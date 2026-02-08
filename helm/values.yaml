@@ -1,0 +1,48 @@
+# User service values
+# Inherits from base-chart
+
+base-chart:
+  replicaCount: 2
+  
+  image:
+    repository: your-registry/user-service
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  
+  service:
+    type: ClusterIP
+    port: 8001
+  
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+  
+  # Database and auth configuration
+  configMap:
+    enabled: true
+    data:
+      DATABASE_HOST: "postgres"
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: "users"
+  
+  secret:
+    enabled: true
+    data:
+      DATABASE_USER: "userservice"
+      DATABASE_PASSWORD: "changeme"
+      JWT_SECRET_KEY: "your-secret-key-change-in-production"
+  
+  env:
+    DATABASE_URL: "postgresql://userservice:changeme@postgres:5432/users"
+    JWT_ALGORITHM: "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: "30"
